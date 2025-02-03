@@ -1,13 +1,12 @@
 #	---------------------MAIN----------------------#
 NAME = libft.a
 CC = cc
-AR = ar
 INCLUDE_DIR = ./include
 CFLAGS = -Wall -Wextra -Werror -I $(INCLUDE_DIR)
 
 #	---------------------Sources----------------------#
 VPATH = ./libft ./printf ./get_next_line
-SOURCE_LIBFT = \
+SOURCES_LIBFT = \
 			ft_atoi.c	\
 			ft_atol.c \
 			ft_isalpha.c \
@@ -66,22 +65,57 @@ SOURCES_GNL = \
 SOURCES_GNL_mfd = \
 			get_next_line_bonus.c \
 			get_next_line_utilis.c \
-			
-MY_OBJECTS = $(MY_SOURCES:.c=.o)
-MY_OBJECTS_B = $(MY_SOURCES_B:.c=.o)
-MY_OBJECTS_PF = $(MY_SOURCES_PF:.c=.o)
-MY_OBJECTS_GNL = $(MY_SOURCES_GNL:.c=.o)
 
-# %.o: %.c
-# 	$(CC) $(CFLAGS) -c $< -o $@
+
+#-----------OBJECTS----------------------#
+OBJECTS_DIR = objects
+SOURCES = $(SOURCES_LIBFT) $(SOURCES_PRINTF) $(SOURCES_GNL) $(SOURCES_GNL_mfd)
+OBJECTS = $(addprefix $(OBJECT_DIR)/, $(SOURCES:.c=.0))
+
+# ---------- COLORS AND STUFF ---------- #
+Color_Off = \033[0m
+BIYellow = \033[1;93m
+Yellow = \033[0;33m
+BGreen = \033[1;32m 
+On_Yellow = \033[43m
+On_Green = \033[42m
+Red = \033[0;31m
+
+TOTAL_SOURCES = $(word $(SOURCES))
+CURRENT = 0
+
+
+#	---------------------Sources----------------------#
 
 all: $(NAME)
 
-$(NAME): $(MY_OBJECTS) $(MY_OBJECTS_B) $(MY_OBJECTS_PF) $(MY_OBJECTS_GNL)
-	$(AR) -rcs $(NAME) $(MY_OBJECTS) $(MY_OBJECTS_B) $(MY_OBJECTS_PF) $(MY_OBJECTS_GNL)
+$(NAME): $(MY_OBJECTS)
+	@echo "$(BIYellow) Compiling $(NAME) $(Color_Off)"
+	$(AR) -rcs $(NAME) $(CFLAGS) $(OBJECTS)
+	@if [ -f $(NAME) ]; then \
+		echo "$(On_Yellow)------------------------------------------$(Color_Off)"; \
+		echo "$(BGreen)PROCESS COMPLETED SUCCESSFULLY!$(Color_Off)"; \
+		echo "$(On_Green)------------------------------------------$(Color_Off)"; \
+	else \
+		echo "$(Red)failed to compile $(NAME) $(Color_Off)"; \
+		exit 1; \
+	fi
+
+$(OBJECT_DIR)/%.o: %.c | $(OBJECT_DIR)
+	@$(eval CURRENT := $(shell echo $$(($(CURRENT) + 1))))
+	@$(eval PERCENT := $(shell echo $$(($(CURRENT) * 100 / $(TOTAL_SRCS)))))
+	@printf "$(CLEAR_LINE)$(BIYellowY)Compiling $(PERCENT)%% [$(CURRENT)/$(TOTAL_SRCS)] $(BGreen)$<$(NC)"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJECT_DIR):
+	@echo "(BIYellow) Created $(OBJECT_DIR) Directory $(Color_Off)"
+	@mkdir -p $(OBJECT_DIR)
+
 
 clean: 
-	rm -f $(MY_OBJECTS) $(MY_OBJECTS_B) $(MY_OBJECTS_PF) $(MY)
+	@echo "$(Red)Cleaning object file$(Color_Off)"
+	rm -rf $(OBJECT_DIR)
+
 
 fclean: clean 
 	rm -f $(NAME)
